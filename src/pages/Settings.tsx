@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { db } from '../db/db';
 import type { WireType } from '../db/db';
 import { Settings as SettingsIcon, Save, Trash2, Plus, Palette, Activity } from 'lucide-react';
@@ -33,12 +33,21 @@ export default function Settings() {
     }
   };
 
+  const tableBottomRef = React.useRef<HTMLTableRowElement>(null);
+
   const addWireType = async () => {
-    await db.wireTypes.add({
+    const defaultData = {
       designation: 'New Wire Type',
       maxCurrent: 10,
       resistancePerFt: 0.010
-    });
+    };
+    const newId = await db.wireTypes.add(defaultData);
+    setEditingId(newId as number);
+    setEditForm(defaultData);
+    
+    setTimeout(() => {
+      tableBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
   };
 
   const deleteWireType = async (id: number) => {
@@ -174,6 +183,7 @@ export default function Settings() {
                      <td colSpan={3} className="px-6 py-8 text-center text-text-muted">No canonical wire types defined in library.</td>
                    </tr>
                 )}
+                <tr ref={tableBottomRef} />
               </tbody>
             </table>
           </div>
