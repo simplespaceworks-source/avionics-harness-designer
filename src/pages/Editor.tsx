@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../store/useProjectStore';
-import { db } from '../db/db';
 import {
   ReactFlow,
   Background,
@@ -17,7 +16,7 @@ import {
 } from '@xyflow/react';
 import type { Connection, Edge, Node, NodeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, PenSquare, FolderPen } from 'lucide-react';
+import { ArrowLeft, FolderPen } from 'lucide-react';
 import ComponentNode from '../components/canvas/ComponentNode';
 import { GroupNode } from '../components/canvas/GroupNode';
 import WireEdge from '../components/canvas/WireEdge';
@@ -142,7 +141,7 @@ function EditorCanvas() {
   );
 
   const onNodeDragStop = useCallback(
-    async (event: React.MouseEvent, node: Node, allNodes: Node[]) => {
+    async (_: React.MouseEvent, node: Node) => {
       if (node.type === 'groupNode') {
          const gId = Number(node.id.split('-')[1]);
          const targetGroup = groups.find(g => g.id === gId);

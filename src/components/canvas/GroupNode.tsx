@@ -19,7 +19,7 @@ export const GroupNode = memo(({ data, selected }: GroupNodeProps) => {
         isVisible={selected} 
         minWidth={200} 
         minHeight={150} 
-        onResizeEnd={(evt, params) => {
+        onResizeEnd={(_, params) => {
           if (data.onResizeBox) {
             data.onResizeBox(params.width, params.height);
           }

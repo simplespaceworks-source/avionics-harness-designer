@@ -11,8 +11,9 @@ export default function Dashboard() {
   const createProject = async () => {
     const id = await db.projects.add({
       name: 'New Harness Project',
-      lastModified: Date.now(),
-      canvasState: '{}'
+      tailNumber: '',
+      aircraftType: '',
+      lastModified: new Date(),
     });
     navigate(`/editor/${id}`);
   };

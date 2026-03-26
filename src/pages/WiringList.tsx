@@ -77,7 +77,7 @@ function PinMappingGroup({
             const targetInst = instances.find((i: ComponentInstance) => i.id === targetInstId);
             const targetTpl = templates.find((t: any) => t.id === targetInst?.templateId);
             const pinRaw = targetPinFullId.split('-').pop(); // rough guess
-            const targetLabel = targetInst ? `${targetInst.customName || targetTpl?.name} => Pin ${pinRaw}` : 'Unknown Target';
+            const targetLabel = targetInst ? `${targetInst.name || targetTpl?.name} => Pin ${pinRaw}` : 'Unknown Target';
 
             return (
               <div key={wire.id} className="flex items-center justify-between bg-canvas border border-border rounded-md px-3 py-2 text-xs">
@@ -116,7 +116,7 @@ function PinMappingGroup({
                  const tpl = templates.find((t: any) => t.id === otherInst.templateId);
                  return (
                   <option key={otherInst.id} value={otherInst.id}>
-                    {otherInst.customName || tpl?.name || `Comp ${otherInst.id}`}
+                    {otherInst.name || tpl?.name || `Comp ${otherInst.id}`}
                   </option>
                  )
               })}
@@ -205,7 +205,7 @@ export default function WiringList() {
                   <div className="flex items-center gap-3">
                     {isExpanded ? <ChevronDown size={18} className="text-text-muted" /> : <ChevronRight size={18} className="text-text-muted" />}
                     <h3 className="font-medium text-white text-lg text-left">
-                      {inst.customName || template.name}
+                      {inst.name || template.name}
                     </h3>
                     <span className="text-xs text-text-muted font-mono bg-canvas px-2 py-0.5 rounded border border-border">ID: {inst.id}</span>
                   </div>

@@ -18,7 +18,7 @@ export async function exportWireListCSV(projectId: number) {
     if (!template) return;
 
     csvRows.push(''); // Blank spacer between components
-    csvRows.push(`"--- COMPONENT: ${inst.customName || template.name} ---"`);
+    csvRows.push(`"--- COMPONENT: ${inst.name || template.name} ---"`);
     csvRows.push(`"Connector","Pin Name","Signal Type","Target Component","Target Pin","Wire Gauge","Wire Color","Length"`);
 
     const connectors = template.defaultConnectors;
@@ -44,7 +44,7 @@ export async function exportWireListCSV(projectId: number) {
              
              const targetInst = instances.find(i => i.id === targetInstId);
              const targetTpl = templates.find(t => t.id === targetInst?.templateId);
-             const targetName = targetInst?.customName || targetTpl?.name || 'Unknown';
+             const targetName = targetInst?.name || targetTpl?.name || 'Unknown';
              
              let targetPinName = targetPinFullId;
              if (targetTpl) {
@@ -122,7 +122,7 @@ export async function importProjectJSON(file: File): Promise<number | undefined>
         const newProject = { ...data.project };
         delete newProject.id;
         newProject.name = newProject.name + ' (Imported)';
-        newProject.lastModified = Date.now();
+        newProject.lastModified = new Date();
         
         const newProjectId = await db.projects.add(newProject);
         

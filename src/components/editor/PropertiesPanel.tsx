@@ -162,8 +162,8 @@ export default function PropertiesPanel() {
         <div>
            <label className="block text-xs font-medium text-text-muted mb-2 uppercase tracking-wide">Custom Name</label>
            <input 
-             value={inst.customName || ''}
-             onChange={(e) => updateInstance(inst.id!, { customName: e.target.value })}
+             value={inst.name || ''}
+             onChange={(e) => updateInstance(inst.id!, { name: e.target.value })}
              placeholder={tpl?.name || 'My Component'}
              className="w-full bg-panel border border-border rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-accent transition-colors"
            />
