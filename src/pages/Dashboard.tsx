@@ -3,6 +3,8 @@ import { db } from '../db/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Plus, Trash2, Clock, Plane, Download, Upload } from 'lucide-react';
 import { exportProjectJSON, importProjectJSON } from '../utils/export';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { useState } from 'react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -18,13 +20,20 @@ export default function Dashboard() {
     navigate(`/editor/${id}`);
   };
 
-  const deleteProject = async (e: React.MouseEvent, id: number) => {
-    e.stopPropagation();
-    if (confirm('Are you sure you want to delete this project?')) {
-      await db.projects.delete(id);
-      await db.instances.where('projectId').equals(id).delete();
-      await db.wires.where('projectId').equals(id).delete();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const confirmDelete = async () => {
+    if (confirmDeleteId !== null) {
+      await db.projects.delete(confirmDeleteId);
+      await db.instances.where('projectId').equals(confirmDeleteId).delete();
+      await db.wires.where('projectId').equals(confirmDeleteId).delete();
+      setConfirmDeleteId(null);
     }
+  };
+
+  const deleteProject = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setConfirmDeleteId(id);
   };
 
   const handleExport = async (e: React.MouseEvent, id: number) => {
@@ -112,6 +121,14 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmDeleteId !== null}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? All associated components and wires will be permanently lost."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

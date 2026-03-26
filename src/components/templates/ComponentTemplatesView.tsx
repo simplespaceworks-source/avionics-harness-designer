@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import type { ComponentTemplate } from '../../db/db';
 import { Plus, Trash2, Image as ImageIcon, Save, X, Link as LinkIcon, Edit2 } from 'lucide-react';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export default function ComponentTemplatesView() {
   const templates = useLiveQuery(() => db.templates.toArray());
@@ -51,22 +52,31 @@ export default function ComponentTemplatesView() {
     }));
   };
 
-  const updateConnectorRefId = (id: string, newTemplateId: number) => {
-    const ct = connectorTemplates.find(c => c.id === newTemplateId);
-    if (!ct) return;
-    
-    // Changing connector physical model implies regenerating default pins to match new pin count
-    if (confirm("Changing the underlying connector type will reset pin labels. Proceed?")) {
-      const initialPins = Array.from({ length: ct.pinCount || 1 }).map((_, i) => ({
-        id: crypto.randomUUID(), pinIndex: i + 1, name: String(i + 1), type: 'Not Used'
-      }));
-      setFormData(prev => ({
-        ...prev,
-        defaultConnectors: prev.defaultConnectors?.map(c => 
-          c.id === id ? { ...c, connectorTemplateId: newTemplateId, pins: initialPins } : c
-        )
-      }));
+  const [confirmConnectorChange, setConfirmConnectorChange] = useState<{id: string, newId: number} | null>(null);
+
+  const executeConnectorChange = () => {
+    if (!confirmConnectorChange) return;
+    const {id, newId} = confirmConnectorChange;
+    const ct = connectorTemplates.find(c => c.id === newId);
+    if (!ct) {
+      setConfirmConnectorChange(null);
+      return;
     }
+    
+    const initialPins = Array.from({ length: ct.pinCount || 1 }).map((_, i) => ({
+      id: crypto.randomUUID(), pinIndex: i + 1, name: String(i + 1), type: 'Not Used'
+    }));
+    setFormData(prev => ({
+      ...prev,
+      defaultConnectors: prev.defaultConnectors?.map(c => 
+        c.id === id ? { ...c, connectorTemplateId: newId, pins: initialPins } : c
+      )
+    }));
+    setConfirmConnectorChange(null);
+  };
+
+  const updateConnectorRefId = (id: string, newTemplateId: number) => {
+    setConfirmConnectorChange({ id, newId: newTemplateId });
   };
 
   const updatePinParams = (connId: string, pinId: string, param: string, value: string) => {
@@ -88,9 +98,12 @@ export default function ComponentTemplatesView() {
     }));
   };
 
-  const deleteTemplate = async (id: number) => {
-    if (confirm('Delete this template? Instances will keep their properties but lose template sync.')) {
-      await db.templates.delete(id);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const confirmDelete = async () => {
+    if (confirmDeleteId !== null) {
+      await db.templates.delete(confirmDeleteId);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -310,7 +323,7 @@ export default function ComponentTemplatesView() {
                 <Edit2 size={16} />
               </button>
               <button 
-                onClick={() => deleteTemplate(tpl.id!)}
+                onClick={() => setConfirmDeleteId(tpl.id!)}
                 className="p-1.5 text-text-muted hover:text-system-error rounded-md hover:bg-system-error/10"
                 title="Delete Template"
               >
@@ -325,6 +338,22 @@ export default function ComponentTemplatesView() {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmDeleteId !== null}
+        title="Delete Component Template"
+        message="Delete this template? Instances on the canvas will keep their properties but lose template synchronization."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
+
+      <ConfirmModal 
+        isOpen={confirmConnectorChange !== null}
+        title="Change Connector Type"
+        message="Changing the underlying connector type will reset all existing pin labels and logic. Proceed?"
+        onConfirm={executeConnectorChange}
+        onCancel={() => setConfirmConnectorChange(null)}
+      />
     </div>
   );
 }

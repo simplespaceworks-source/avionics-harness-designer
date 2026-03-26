@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import type { ConnectorTemplate } from '../../db/db';
 import { Plus, Trash2, Image as ImageIcon, Save, X, Edit2 } from 'lucide-react';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export default function ConnectorTemplatesView() {
   const templates = useLiveQuery(() => db.connectorTemplates.toArray());
@@ -32,9 +33,12 @@ export default function ConnectorTemplatesView() {
     setIsFormOpen(true);
   };
 
-  const deleteTemplate = async (id: number) => {
-    if (confirm('Delete this connector template?')) {
-      await db.connectorTemplates.delete(id);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const confirmDelete = async () => {
+    if (confirmDeleteId !== null) {
+      await db.connectorTemplates.delete(confirmDeleteId);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -139,7 +143,7 @@ export default function ConnectorTemplatesView() {
                     <Edit2 size={16} />
                   </button>
                   <button 
-                    onClick={() => deleteTemplate(tpl.id!)}
+                    onClick={() => setConfirmDeleteId(tpl.id!)}
                     className="p-1.5 text-text-muted hover:text-system-error rounded-md hover:bg-system-error/10"
                     title="Delete Template"
                   >
@@ -169,6 +173,14 @@ export default function ConnectorTemplatesView() {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmDeleteId !== null}
+        title="Delete Connector Template"
+        message="Are you sure you want to delete this connector template? It cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

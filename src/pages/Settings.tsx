@@ -3,6 +3,7 @@ import { db } from '../db/db';
 import type { WireType } from '../db/db';
 import { Settings as SettingsIcon, Save, Trash2, Plus, Palette, Activity } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 
 export default function Settings() {
   const wireTypes = useLiveQuery(() => db.wireTypes.toArray());
@@ -50,15 +51,18 @@ export default function Settings() {
     }, 100);
   };
 
-  const deleteWireType = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this wire type? Standard template references may break.')) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const confirmDelete = async () => {
+    if (confirmDeleteId !== null) {
       try {
-        console.log('Attempting deletion of wire type ID:', id);
-        await db.wireTypes.delete(Number(id));
+        console.log('Attempting deletion of wire type ID:', confirmDeleteId);
+        await db.wireTypes.delete(Number(confirmDeleteId));
       } catch (err: any) {
         console.error('Deletion failure:', err);
         window.alert('Failed to delete wire type. See console for details.');
       }
+      setConfirmDeleteId(null);
     }
   };
 
@@ -173,7 +177,7 @@ export default function Settings() {
                             Edit Properties
                           </button>
                           <button 
-                            onClick={() => deleteWireType(wt.id!)}
+                            onClick={() => setConfirmDeleteId(wt.id!)}
                             className="p-1.5 text-text-muted hover:text-system-error hover:bg-system-error/10 rounded transition-all"
                             title="Delete Wire Type"
                           >
@@ -195,6 +199,14 @@ export default function Settings() {
           </div>
         </section>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmDeleteId !== null}
+        title="Delete Canonical Wire Gauge"
+        message="Are you sure you want to delete this wire type? Standard template references utilizing this gauge may break."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }
