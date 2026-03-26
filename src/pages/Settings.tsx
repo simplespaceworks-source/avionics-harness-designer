@@ -51,8 +51,14 @@ export default function Settings() {
   };
 
   const deleteWireType = async (id: number) => {
-    if (confirm('Are you sure you want to delete this wire type? Standard template references may break.')) {
-      await db.wireTypes.delete(id);
+    if (window.confirm('Are you sure you want to delete this wire type? Standard template references may break.')) {
+      try {
+        console.log('Attempting deletion of wire type ID:', id);
+        await db.wireTypes.delete(Number(id));
+      } catch (err: any) {
+        console.error('Deletion failure:', err);
+        window.alert('Failed to delete wire type. See console for details.');
+      }
     }
   };
 
