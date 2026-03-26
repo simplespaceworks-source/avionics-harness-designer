@@ -85,7 +85,6 @@ function EditorCanvas() {
         type: 'componentNode',
         position: { x: inst.posX, y: inst.posY },
         parentId: inst.groupId ? `group-${inst.groupId}` : undefined,
-        extent: (inst.groupId ? 'parent' : undefined) as 'parent' | undefined,
         data: { instance: inst },
       }))
     ];
@@ -165,10 +164,19 @@ function EditorCanvas() {
       }
       
       const instId = Number(node.id);
-      // Native X/Y geometry vectors (global frame)
-      const absPos = (node as any).computed?.positionAbsolute || (node as any).positionAbsolute;
-      const absX = absPos?.x || node.position.x;
-      const absY = absPos?.y || node.position.y;
+      
+      // Calculate true global coordinates regardless of parent nesting
+      let absX = node.position.x;
+      let absY = node.position.y;
+      
+      if (node.parentId && node.parentId.startsWith('group-')) {
+         const currentParentId = Number(node.parentId.split('-')[1]);
+         const parentGroup = groups.find(g => g.id === currentParentId);
+         if (parentGroup) {
+            absX += parentGroup.posX;
+            absY += parentGroup.posY;
+         }
+      }
 
       const targetGroup = groups.find(g => 
          absX >= g.posX && absX <= g.posX + g.width &&
