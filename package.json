@@ -11,7 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "https://GITHUB_USERNAME.github.io/avionics-harness-designer/",
+  "homepage": "https://simplespaceworks-source.github.io/avionics-harness-designer/",
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@xyflow/react": "^12.10.1",
